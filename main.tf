@@ -10,6 +10,7 @@ variable "vpc_cidr" {}
 variable "subnet_cidr" {}
 variable "avail_zone" {}
 variable "ami" {}
+variable "ec2_type" {}
 
 
 resource "aws_vpc" "dev-vpc" {
@@ -57,7 +58,9 @@ resource "aws_route_table_association" "associate_route_table" {
   route_table_id = aws_route_table.vpc_route_table.id
 }
 
-resource "aws_security_group" "nsg_ssh" {
+# Security group for ssh and nginx
+
+resource "aws_security_group" "nsg_ssh_nginx" {
   name = "SSH_NGINX"
   vpc_id = aws_vpc.dev-vpc.id
 
@@ -88,3 +91,21 @@ resource "aws_security_group" "nsg_ssh" {
     "Name" = "${var.env}_sg"
   }
 }
+
+resource "aws_instance" "my-app" {
+  ami = var.ami
+  instance_type = var.ec2_type
+
+  subnet_id = aws_subnet.dev-subnet-1.id
+  security_groups = [aws_security_group.nsg_ssh_nginx.id]
+  availability_zone = var.avail_zone
+
+  associate_public_ip_address = true      # for assigning public ip to ec2 machine
+  key_name = "mumbai_key"
+
+  tags = {
+    Name = "${var.env}-server"
+  }
+}
+
+
