@@ -1,0 +1,10 @@
+# local terrform diver
+.terraform/*
+
+# terraform state file 
+*.tfstate
+*.tfstate.*
+
+
+# terraform variable file 
+*.tfvars 
