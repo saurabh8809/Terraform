@@ -9,6 +9,7 @@ variable "env" {}
 variable "vpc_cidr" {}
 variable "subnet_cidr" {}
 variable "avail_zone" {}
+variable "ami" {}
 
 
 resource "aws_vpc" "dev-vpc" {
@@ -52,6 +53,38 @@ resource "aws_route_table" "vpc_route_table" {
 # connect route table with subnet 
 
 resource "aws_route_table_association" "associate_route_table" {
-  subnet_id = aws.subnet.dev-subnet-1.id
+  subnet_id = aws_subnet.dev-subnet-1.id
   route_table_id = aws_route_table.vpc_route_table.id
+}
+
+resource "aws_security_group" "nsg_ssh" {
+  name = "SSH_NGINX"
+  vpc_id = aws_vpc.dev-vpc.id
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 8080
+    to_port = 8080
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    prefix_list_ids = []
+
+  }
+
+  tags = {
+    "Name" = "${var.env}_sg"
+  }
 }
