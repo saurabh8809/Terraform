@@ -103,9 +103,22 @@ resource "aws_instance" "my-app" {
   associate_public_ip_address = true      # for assigning public ip to ec2 machine
   key_name = "mumbai_key"
 
+  # user_data = <<EOF
+  #             #!/bin/bash
+  #             sudo yum update -y && sudo yum install docker -y
+  #             sudo systemctl start docker 
+  #             sudo usermod -aG docker ec2-user
+  #             sudo docker run -itd -p 8080:80 --name web-app nginx
+  # EOF
+  user_data = "${file("ec2-user-data.sh")}"
   tags = {
     Name = "${var.env}-server"
   }
+}
+
+output "ec2_public_ip" {
+  value = aws_instance.my-app.public_ip
+  
 }
 
 
