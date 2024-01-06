@@ -1,0 +1,5 @@
+{
+    "rg-name": "terraform-rg",
+    "vnet-name": "test-vnet",
+    "location": "centralindia"
+}
