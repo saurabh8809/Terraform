@@ -1,18 +1,19 @@
 #!/bin/bash
 cd $(dirname $0)
 echo ""
+git pull
 
 ADDED_FILE=$(git diff --name-only --diff-filter=A HEAD^..HEAD ./input_files/)
+MODIFIED_FILE=$(git diff --name-only --diff-filter=M HEAD^..HEAD ./input_files/)
+DELETED_FILES=$(git diff --name-only --diff-filter=D HEAD^..HEAD ./input_files/)
 
+
+# DELETED_FILES="input_files/vnet-var-2.json"
+# MODIFIED_FILE="input_files/mod.json"
 # ADDED_FILE="input_files/vnet-var.json"
 
 # DELETED_FILES="input_files/vnet-var-2.json
 # input_files/vnet-var.json"
-
-MODIFIED_FILE=$(git diff --name-only --diff-filter=M HEAD^..HEAD ./input_files/)
-# MODIFIED_FILE="input_files/mod.json"
-# DELETED_FILES=$(git diff --name-only --diff-filter=D HEAD^..HEAD ./input_files/)
-DELETED_FILES="input_files/vnet-var-2.json"
 
 if [[ -n ${ADDED_FILE} ]]; then
 #{
@@ -24,6 +25,7 @@ if [[ -n ${ADDED_FILE} ]]; then
         terraform init
         terraform workspace new ${TF_WORKSPACE_NAME}
         terraform apply --auto-approve --var-file=${vNAME}
+        terraform workspace select default
     done
 #}
 else
@@ -39,8 +41,9 @@ if [[ -n ${MODIFIED_FILE} ]]; then
         TF_WORKSPACE_NAME=$(echo ${vNAME} | awk -F '/' '{print $2}' | awk -F '.' '{print $1}')
         echo "MODIFIED_FILE is ${MD_FILE_NAME} and Workspace is ${TF_WORKSPACE_NAME}"
         terraform init
-        terraform workspace select ${TF_WORKSPACE_NAME}
+        terraform workspace select -or-create=true ${TF_WORKSPACE_NAME}
         terraform apply --auto-approve --var-file=${vNAME}
+        terraform workspace select default
     done
 #}
 else
